@@ -256,7 +256,7 @@
                     <h3 class="category-title">
                         <i class="fas fa-university"></i> Academic Education
                     </h3>
-                    <a href="https://www.linkedin.com/posts/kavindi-gamage_classof2025-sliit-informationtechnology-activity-7417838877261979648-JZwv?utm_source=social_share_send&utm_medium=android_app&rcm=ACoAADZoH78B6twFwdYYg3DE5i1hrwVi73huW7s&utm_campaign=copy_link" target="_blank" rel="noopener noreferrer" class="education-card-link">
+                    <a href="https://www.linkedin.com/posts/kavindi-gamage_im-thrilled-to-share-that-ive-officially-activity-7381262551776546817-tkZP?utm_source=share&utm_medium=member_desktop&rcm=ACoAADZoH78B6twFwdYYg3DE5i1hrwVi73huW7s" target="_blank" rel="noopener noreferrer" class="education-card-link">
                         <div class="education-card">
                             <div class="edu-icon">
                                 <i class="fas fa-graduation-cap"></i>
@@ -498,7 +498,267 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- Admin Panel (Hidden by default) -->
+    <div id="adminPanel" style="display: none;">
+        <div class="admin-overlay">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-chart-line"></i> Portfolio Analytics</h2>
+                    <button class="admin-close" onclick="document.getElementById('adminPanel').style.display='none'">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="admin-content" id="adminContent">
+                    <div class="stat-card">
+                        <div class="stat-icon views">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="statViews">0</h3>
+                            <p>Portfolio Views</p>
+                            <small id="statLastView"></small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon downloads">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="statDownloads">0</h3>
+                            <p>CV Downloads</p>
+                            <small id="statLastDownload"></small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon date">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="statFirstView">N/A</h3>
+                            <p>Tracking Since</p>
+                        </div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-reset" onclick="if(confirm('Reset all stats?')){localStorage.clear(); location.reload();}">
+                            <i class="fas fa-redo"></i> Reset Stats
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom JavaScript -->
     <script src="script.js"></script>
+    
+    <!-- Simple Admin Check -->
+    <script>
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('admin') === 'kavindi2024') {
+            const panel = document.getElementById('adminPanel');
+            if (panel) {
+                // Update stats
+                const views = parseInt(localStorage.getItem('portfolioViews')) || 0;
+                const downloads = parseInt(localStorage.getItem('cvDownloads')) || 0;
+                const firstView = localStorage.getItem('firstViewDate');
+                const lastView = localStorage.getItem('lastViewDate');
+                const lastDownload = localStorage.getItem('lastDownloadDate');
+                
+                document.getElementById('statViews').textContent = views.toLocaleString();
+                document.getElementById('statDownloads').textContent = downloads.toLocaleString();
+                document.getElementById('statFirstView').textContent = firstView ? new Date(firstView).toLocaleDateString() : 'N/A';
+                if (lastView) {
+                    document.getElementById('statLastView').textContent = 'Last: ' + new Date(lastView).toLocaleDateString();
+                }
+                if (lastDownload) {
+                    document.getElementById('statLastDownload').textContent = 'Last: ' + new Date(lastDownload).toLocaleDateString();
+                }
+                
+                // Show panel
+                panel.style.display = 'flex';
+                
+                // Remove password from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+    })();
+    </script>
+    
+    <!-- Admin Panel Styles -->
+    <style>
+        #adminPanel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #adminPanel[style*="display: flex"],
+        #adminPanel[style*="display:flex"] {
+            display: flex !important;
+        }
+        
+        .admin-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            animation: slideDown 0.3s ease;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-header h2 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+        
+        .admin-header h2 i {
+            color: var(--primary-color);
+        }
+        
+        .admin-close {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            transition: var(--transition);
+        }
+        
+        .admin-close:hover {
+            color: var(--primary-color);
+            transform: rotate(90deg);
+        }
+        
+        .admin-content {
+            padding: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+        
+        .stat-card:hover {
+            transform: translateX(5px);
+            border-color: var(--primary-color);
+        }
+        
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+        
+        .stat-icon.views {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        }
+        
+        .stat-icon.downloads {
+            background: linear-gradient(135deg, #06B6D4, #0891B2);
+        }
+        
+        .stat-icon.date {
+            background: linear-gradient(135deg, #5EEAD4, #14B8A6);
+        }
+        
+        .stat-info h3 {
+            color: var(--text-primary);
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+        }
+        
+        .stat-info p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-weight: 500;
+        }
+        
+        .stat-info small {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .admin-actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .btn-reset {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-reset:hover {
+            border-color: #EF4444;
+            color: #EF4444;
+            transform: translateY(-2px);
+        }
+    </style>
 </body>
 </html>
