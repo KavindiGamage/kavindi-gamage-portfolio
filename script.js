@@ -174,6 +174,9 @@ document.getElementById('footerGithub')?.addEventListener('click', (e) => {
 document.getElementById('downloadCV')?.addEventListener('click', (e) => {
     e.preventDefault();
     
+    // Track CV download
+    trackCVDownload();
+    
     // Create a temporary anchor element to trigger download
     const link = document.createElement('a');
     link.href = 'Kavindi_Gamage.pdf';
@@ -181,6 +184,268 @@ document.getElementById('downloadCV')?.addEventListener('click', (e) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+});
+
+// ===================================
+// Analytics Tracking System
+// ===================================
+const ADMIN_PASSWORD = 'kavindi2024'; // Change this to your preferred password
+
+// Initialize analytics data
+function initAnalytics() {
+    if (!localStorage.getItem('portfolioViews')) {
+        localStorage.setItem('portfolioViews', '0');
+    }
+    if (!localStorage.getItem('cvDownloads')) {
+        localStorage.setItem('cvDownloads', '0');
+    }
+    if (!localStorage.getItem('firstViewDate')) {
+        localStorage.setItem('firstViewDate', new Date().toISOString());
+    }
+}
+
+// Track page view
+function trackPageView() {
+    initAnalytics();
+    const views = parseInt(localStorage.getItem('portfolioViews')) || 0;
+    localStorage.setItem('portfolioViews', (views + 1).toString());
+    localStorage.setItem('lastViewDate', new Date().toISOString());
+}
+
+// Track CV download
+function trackCVDownload() {
+    initAnalytics();
+    const downloads = parseInt(localStorage.getItem('cvDownloads')) || 0;
+    localStorage.setItem('cvDownloads', (downloads + 1).toString());
+    localStorage.setItem('lastDownloadDate', new Date().toISOString());
+}
+
+// Get analytics data
+function getAnalytics() {
+    initAnalytics();
+    return {
+        views: parseInt(localStorage.getItem('portfolioViews')) || 0,
+        downloads: parseInt(localStorage.getItem('cvDownloads')) || 0,
+        firstView: localStorage.getItem('firstViewDate'),
+        lastView: localStorage.getItem('lastViewDate'),
+        lastDownload: localStorage.getItem('lastDownloadDate')
+    };
+}
+
+// Show admin panel - define directly on window to ensure global access
+window.showAdminPanel = function showAdminPanel() {
+    try {
+        console.log('🎯 showAdminPanel() called');
+        
+        // Remove existing panel if any
+        const existingPanel = document.getElementById('adminPanel');
+        if (existingPanel) {
+            existingPanel.remove();
+            console.log('🗑️ Removed existing panel');
+        }
+        
+        const analytics = getAnalytics();
+        console.log('📊 Analytics data:', analytics);
+        
+        const adminPanel = document.createElement('div');
+        adminPanel.id = 'adminPanel';
+    adminPanel.innerHTML = `
+        <div class="admin-overlay">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2><i class="fas fa-chart-line"></i> Portfolio Analytics</h2>
+                    <button class="admin-close" onclick="closeAdminPanel()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="admin-content">
+                    <div class="stat-card">
+                        <div class="stat-icon views">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>${analytics.views.toLocaleString()}</h3>
+                            <p>Portfolio Views</p>
+                            ${analytics.lastView ? `<small>Last: ${new Date(analytics.lastView).toLocaleDateString()}</small>` : ''}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon downloads">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>${analytics.downloads.toLocaleString()}</h3>
+                            <p>CV Downloads</p>
+                            ${analytics.lastDownload ? `<small>Last: ${new Date(analytics.lastDownload).toLocaleDateString()}</small>` : ''}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon date">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>${analytics.firstView ? new Date(analytics.firstView).toLocaleDateString() : 'N/A'}</h3>
+                            <p>Tracking Since</p>
+                        </div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-reset" onclick="resetAnalytics()">
+                            <i class="fas fa-redo"></i> Reset Stats
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (!document.body) {
+        console.error('❌ document.body is not available yet!');
+        setTimeout(showAdminPanel, 100);
+        return;
+    }
+    
+    document.body.appendChild(adminPanel);
+    console.log('✅ Admin panel added to DOM');
+    console.log('✅ Panel element:', document.getElementById('adminPanel'));
+    } catch (error) {
+        console.error('❌ Error showing admin panel:', error);
+    }
+};
+
+// Confirm it's on window
+console.log('✅ showAdminPanel defined directly on window:', typeof window.showAdminPanel);
+
+// Immediately expose to window
+window.showAdminPanel = showAdminPanel;
+console.log('✅ showAdminPanel function exposed to window');
+
+// Close admin panel
+function closeAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+    if (panel) {
+        panel.remove();
+    }
+}
+
+// Reset analytics
+function resetAnalytics() {
+    if (confirm('Are you sure you want to reset all analytics data?')) {
+        localStorage.removeItem('portfolioViews');
+        localStorage.removeItem('cvDownloads');
+        localStorage.removeItem('firstViewDate');
+        localStorage.removeItem('lastViewDate');
+        localStorage.removeItem('lastDownloadDate');
+        closeAdminPanel();
+        alert('Analytics data has been reset.');
+    }
+}
+
+// Make functions globally accessible for onclick handlers and console
+window.closeAdminPanel = closeAdminPanel;
+window.resetAnalytics = resetAnalytics;
+window.showAdminPanel = showAdminPanel; // Already set above, but ensure it's set
+window.getAnalytics = getAnalytics; // For debugging
+
+// Double-check all functions are exposed
+console.log('🔍 Function exposure check:', {
+    showAdminPanel: typeof window.showAdminPanel,
+    closeAdminPanel: typeof window.closeAdminPanel,
+    resetAnalytics: typeof window.resetAnalytics,
+    getAnalytics: typeof window.getAnalytics
+});
+
+// Check for admin access
+function checkAdminAccess() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const password = urlParams.get('admin');
+    
+    console.log('Checking admin access. Password from URL:', password);
+    console.log('Expected password:', ADMIN_PASSWORD);
+    
+    if (password === ADMIN_PASSWORD) {
+        console.log('Admin access granted! Showing panel...');
+        showAdminPanel();
+        // Remove password from URL for security
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        console.log('Admin access denied or no password provided');
+    }
+}
+
+// Track page view on load
+trackPageView();
+
+// Check for admin access - simplified and runs multiple times to ensure it works
+function runAdminCheck() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const password = urlParams.get('admin');
+    
+    console.log('🔍 [ADMIN CHECK] URL password:', password);
+    console.log('🔍 [ADMIN CHECK] Expected password:', ADMIN_PASSWORD);
+    console.log('🔍 [ADMIN CHECK] Match?', password === ADMIN_PASSWORD);
+    
+    if (password === ADMIN_PASSWORD) {
+        console.log('✅ [ADMIN] Access GRANTED! Attempting to show panel...');
+        
+        // Try to show panel immediately
+        if (document.body) {
+            console.log('✅ [ADMIN] document.body exists, showing panel now');
+            showAdminPanel();
+        } else {
+            console.log('⏳ [ADMIN] Waiting for DOM...');
+            setTimeout(function() {
+                if (document.body) {
+                    console.log('✅ [ADMIN] DOM ready, showing panel');
+                    showAdminPanel();
+                }
+            }, 500);
+        }
+        
+        // Remove password from URL for security
+        setTimeout(function() {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 1000);
+    } else {
+        console.log('❌ [ADMIN] Access denied. Password:', password ? 'provided but incorrect' : 'not provided');
+    }
+}
+
+// Run admin check immediately
+runAdminCheck();
+
+// Also run on DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runAdminCheck);
+} else {
+    setTimeout(runAdminCheck, 100);
+}
+
+// Also run on window load as final backup
+window.addEventListener('load', function() {
+    setTimeout(runAdminCheck, 200);
+});
+
+// Keyboard shortcut: Press Ctrl+Shift+A to open admin panel (for testing)
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        e.preventDefault();
+        console.log('⌨️ [KEYBOARD] Shortcut triggered - Opening admin panel...');
+        if (typeof window.showAdminPanel === 'function') {
+            window.showAdminPanel();
+        } else {
+            console.error('❌ showAdminPanel function not found!');
+        }
+    }
+});
+
+// Confirm functions are loaded
+console.log('%c✅ Analytics system loaded!', 'color: #14B8A6; font-weight: bold; font-size: 14px;');
+console.log('%c💡 TIP: Type showAdminPanel() in console to test', 'color: #14B8A6; font-weight: bold;');
+console.log('%c⌨️ TIP: Press Ctrl+Shift+A to open admin panel', 'color: #14B8A6; font-weight: bold;');
+console.log('🔑 Admin functions available:', {
+    showAdminPanel: typeof window.showAdminPanel,
+    closeAdminPanel: typeof window.closeAdminPanel,
+    getAnalytics: typeof window.getAnalytics
 });
 
 // ===================================
@@ -233,18 +498,9 @@ function typeWriter(element, text, speed = 100) {
 // }
 
 // ===================================
-// Parallax Effect for Hero Section (Optional)
+// Parallax Effect Disabled
+// Keeping sections static while scrolling
 // ===================================
-const heroSection = document.querySelector('.hero-section');
-
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const parallaxSpeed = 0.5;
-    
-    if (heroSection && scrolled < window.innerHeight) {
-        heroSection.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
-    }
-});
 
 // ===================================
 // Skills Card Hover Effect Enhancement
@@ -487,3 +743,36 @@ if ('serviceWorker' in navigator) {
     });
 }
 */
+
+// ===================================
+// Final Global Function Exposure (Ensure availability)
+// ===================================
+(function() {
+    // Ensure all admin functions are globally available
+    if (typeof showAdminPanel === 'function') {
+        window.showAdminPanel = showAdminPanel;
+    }
+    if (typeof closeAdminPanel === 'function') {
+        window.closeAdminPanel = closeAdminPanel;
+    }
+    if (typeof resetAnalytics === 'function') {
+        window.resetAnalytics = resetAnalytics;
+    }
+    if (typeof getAnalytics === 'function') {
+        window.getAnalytics = getAnalytics;
+    }
+    
+    // Final verification
+    console.log('🔍 [FINAL CHECK] Global functions:', {
+        showAdminPanel: typeof window.showAdminPanel,
+        closeAdminPanel: typeof window.closeAdminPanel,
+        resetAnalytics: typeof window.resetAnalytics,
+        getAnalytics: typeof window.getAnalytics
+    });
+    
+    if (typeof window.showAdminPanel === 'function') {
+        console.log('✅ showAdminPanel is NOW available globally!');
+    } else {
+        console.error('❌ ERROR: showAdminPanel is still not available!');
+    }
+})();
